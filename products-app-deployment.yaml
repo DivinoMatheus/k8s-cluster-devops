@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: products-app-deployment
+  labels:
+    app: products-app
+spec: 
+  replicas: 1
+  selector: 
+    matchLabels: 
+      app: products-app
+  template:
+    metadata:
+      labels: 
+        app: products-app 
+    spec:
+      containers:
+        - name: products-app-container
+          image: divinomatheus/products-service:main
+          ports:
+            - containerPort: 80
+          env:
+            - name: DATABASE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: products-app-configmap
+                  key: database-host
+            - name: DATABASE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-user
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-password
+            - name: DATABASE_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: postgres-database
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: products-service
+spec:
+  selector:
+    app: products-app
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30003
