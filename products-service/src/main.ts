@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import * as swaggerStats from 'swagger-stats';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,9 +15,11 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
 
-  SwaggerModule.setup('swagger-ui', app, document);
+  app.use(swaggerStats.getMiddleware({ swaggerSpec: document }));
 
   app.useGlobalPipes(new ValidationPipe());
+
+  SwaggerModule.setup('swagger-ui', app, document);
 
   const PORT = process.env.PORT ?? 80
 
