@@ -19,6 +19,18 @@ spec:
           image: divinomatheus/products-service:main
           ports:
             - containerPort: 80
+          livenessProbe: 
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
           env:
             - name: DATABASE_HOST
               valueFrom:
