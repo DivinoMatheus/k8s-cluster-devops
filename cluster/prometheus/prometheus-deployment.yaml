@@ -20,13 +20,26 @@ spec:
           ports:
             - containerPort: 9090
           volumeMounts:
-            - name: config-volume
+            - name: config
               mountPath: /etc/prometheus
+            - name: storage
+              mountPath: /data
+      initContainers:
+      - name: prometheus-data-permission-fix
+        image: busybox
+        command: ["/bin/chmod","-R","777", "/data"]
+        volumeMounts:
+        - name: storage
+          mountPath: /data
+    
       volumes:
-        - name: config-volume
+        - name: config
           configMap:
             name: prometheus-config
             defaultMode: 420
+        - name: storage
+          persistentVolumeClaim:
+            claimName: prometheus-pvc
 
 ---
 
