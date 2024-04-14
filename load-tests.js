@@ -1,10 +1,14 @@
 import http from 'k6/http'
-import { sleep } from 'k6'
+import { sleep, check } from 'k6'
 
-export const options = {
+export const options = { // target represents the number of parallell users
     stages: [
-        { duration: '5s', target: 10 },
-        { duration: '30s', target: 10 },
+        { duration: '5s', target: 5 },
+        { duration: '1m', target: 5 },
+        { duration: '5s', target: 30 },
+        { duration: '1m', target: 30 },
+        { duration: '5s', target: 50 },
+        { duration: '3m', target: 50 },
         { duration: '5s', target: 0 }
     ]
 }
@@ -21,8 +25,14 @@ const products = [
     '7f0bcaf1-3c49-4a56-aa90-6227007dd478',
 ]
 
-export default () => {
+export default () => { // this is the operation that each user will execute
+    const randomSleep = Math.floor((Math.random() * 5) + 2);
     const randomIndex = Math.floor(Math.random() * 8)
-    http.get(`http://localhost/products/${products[randomIndex]}`)
-    sleep(1)
+    const productId = products[randomIndex]
+
+    const res = http.get(`http://localhost/products/${productId}`)
+    
+    check(res, { '200': (r) => r.status === 200 })
+    
+    sleep(randomSleep) // will wait this random sleep seconds before another try
 }
